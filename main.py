@@ -15,7 +15,7 @@ project_directory = os.path.dirname(os.path.abspath(__file__))
 outside_project_directory = os.path.join(project_directory, '..',)
 sys.path.append(outside_project_directory)
 
-def runTestSARSA(numSim0=0, numBlocks=5, simPerBlock=1000, simulTime=60*60):
+def run(numSim0=0, numBlocks=1, simPerBlock=20, simulTime=10*60, foldername='Input'):
     """
     Runs the SARSA test simulation.
 
@@ -30,12 +30,12 @@ def runTestSARSA(numSim0=0, numBlocks=5, simPerBlock=1000, simulTime=60*60):
     """
     t0 = time.time()
     
-    agentsProfileName = os.path.join("Input", "population.csv")
-    nodesdbFile = os.path.join("Input", "nodes.csv")
-    linksdbFile = os.path.join("Input", "edges.csv")
-    transLinkdbFile = os.path.join("Input", "actionsdb.csv") 
-    transNodedbFile = os.path.join("Input", "transitionsdb.csv")
-    folderStateNames = os.path.join("Input", "StatesMatrices")
+    agentsProfileName = os.path.join(foldername, "population.csv")
+    nodesdbFile = os.path.join(foldername, "nodes.csv")
+    linksdbFile = os.path.join(foldername, "edges.csv")
+    transLinkdbFile = os.path.join(foldername, "actionsdb.csv") 
+    transNodedbFile = os.path.join(foldername, "transitionsdb.csv")
+    folderStateNames = os.path.join(foldername, "StatesMatrices")
     meanRayleighTest = 5 * 60 
     
     survivorsPerSim = []  
@@ -108,19 +108,10 @@ def runTestSARSA(numSim0=0, numBlocks=5, simPerBlock=1000, simulTime=60*60):
     return
 
 
-def main(): 
-    numSim= 0
-    numBlocks= 1  
-    simPerBlock= 20  
-    simulTime= 10*60 
-    runTestSARSA(numSim0= numSim, numBlocks= numBlocks, simPerBlock= simPerBlock, simulTime= simulTime)  
-    return    
-
-
 if __name__ == "__main__":  
     profiler = cProfile.Profile()
     profiler.enable()
-    main()   
+    run()   
     profiler.disable()
     profiler.print_stats(sort='time')
      
