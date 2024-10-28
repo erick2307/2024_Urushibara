@@ -361,7 +361,13 @@ class SARSA:
             dist= ( (self.pedDB[pedIndx,0] - x0L)**2 + (self.pedDB[pedIndx,1] - y0L)**2 )**0.5
             unitL= self.popAtLink_HistParam[codeLink,0]
             
-            xAtLink= int( np.floor( dist / unitL) ) 
+            try:
+                xAtLink= int( np.floor( dist / unitL) ) 
+            except:
+                print(dist, unitL)
+                print(self.popAtLink_HistParam[codeLink])
+                print(self.linksdb[codeLink])
+                print(codeLink)
             speed= self.speArrPerLink[codeLink, xAtLink] + np.random.rand()*0.02 - 0.01  
             unitDir = (self.pedDB[pedIndx,2:4] - self.pedDB[pedIndx,:2]) / np.linalg.norm(self.pedDB[pedIndx,2:4] - self.pedDB[pedIndx,:2])
             vel_arr = speed * unitDir
@@ -566,6 +572,9 @@ class SARSA:
             #     return
             numNodesLinked = self.transNodedb[node0, 1]
             nodesLinked = self.transNodedb[node0, 2:2+numNodesLinked]
+            # print(nodesLinked)
+            # print(nodeTgt)
+            # print(np.where(nodesLinked == nodeTgt))
             indxTgt = np.where(nodesLinked == nodeTgt)[0][0]
             link = self.transLinkdb[node0, 2+indxTgt]
             
@@ -579,34 +588,36 @@ class SARSA:
             else:
                 self.populationAtLinks[int(self.pedDB[pedIndx,6]), 1] -= 1
                 self.populationAtLinks[link, 1] += 1
-                xTgt_arr = np.array([ self.nodesdb[nodeTgt,1], self.nodesdb[nodeTgt,2] ])
-                
-                
+                xTgt_arr = np.array([ self.nodesdb[nodeTgt,1], self.nodesdb[nodeTgt,2] ])                
                 vel_arr = np.array([0,0])
-                
-                self.pedDB[pedIndx , :9] = np.array( [x0_arr[0], x0_arr[1], xTgt_arr[0], xTgt_arr[1], vel_arr[0], vel_arr[1], link, nodeTgt, node0] )
-                
-                self.updateVelocityV2(pedIndx)  # HERE Is THE BUUG
-                
-                
-            
+                self.pedDB[pedIndx , :9] = np.array( [x0_arr[0], x0_arr[1], xTgt_arr[0], xTgt_arr[1], vel_arr[0], vel_arr[1], link, nodeTgt, node0] )                
+                self.updateVelocityV2(pedIndx)  # HERE Is THE BUUG            
         return
     
     def checkTargetShortestPath(self):
         # print("Cheking target")
         
         error = ( (self.pedDB[ : , 0 ] - self.pedDB[ : , 2 ])**2 + (self.pedDB[ :  , 1 ] - self.pedDB[ : , 3 ])**2 )**0.5
-        
         indx = np.where(error <= self.errorLoc)[0]
         # print("indx", indx)
         for i in indx:
-            if self.time < self.pedDB[i,9]:
-                continue
-            
+            #copied from checkTarget 20204.10.26
+            # do not check target if the experience db is empty
+            # if not self.expeStat[i]:
+            #     continue
+            # check if pedestrian already evacuated
             if self.pedDB[i,10]:
                 continue
+            self.updateTargetShortestPath(i)
+        return
+    
+            # if self.time < self.pedDB[i,9]:
+            #     continue
             
-            self.updateTargetShortestPath(i)   # here is the bug!!!
+            # if self.pedDB[i,10]:
+            #     continue
+            
+            # self.updateTargetShortestPath(i)   # here is the bug!!!
             # print("2",self.pedDB[indxNE,4])
         return
 
