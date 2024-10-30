@@ -49,23 +49,26 @@ def run(numSim0=0, numBlocks=1, simPerBlock=20, simulTime=10*60, foldername='Inp
                         meanRayleigh=meanRayleighTest,
                         ifCreateEmptyStateMatrix=True)   
     
-    sarsaTest.loadShortestPathDB(namefile=shortpathfile)     
+    sarsaTest.loadShortestPathDB(namefile=shortpathfile)
+    # sarsaTest.setFigureCanvas()  
     
     for t in range(int(min(sarsaTest.pedDB[:,9])), int(simulTime)):
         sarsaTest.initEvacuationAtTime()   
         sarsaTest.stepForward()
         # optimalChoice = bool(np.random.choice(2, p=[randomChoiceRate, optimalChoiceRate]))
         # sarsaTest.checkTarget(ifOptChoice=optimalChoice)   
-        if not t % 10:
-            sarsaTest.computePedHistDenVelAtLinks()
-            sarsaTest.updateVelocityAllPedestrians()
+        # if not t % 1:
+        #     sarsaTest.getSnapshotV2()
         sarsaTest.checkTargetShortestPath()
     
-    stateMat, weights = sarsaTest.getStateMatricesAndWeights()
+    # stateMat, weights = sarsaTest.getStateMatricesAndWeights()
     
     print("\n\n ***** Simu %d (t= %.2f)*****" % (numSim0, (time.time()-t0)/60.))
     print("survived pedestrians: %d" % np.sum(sarsaTest.pedDB[:,10] == 1))
     survivorsPerSim.append([numSim0, np.sum(sarsaTest.pedDB[:,10] == 1)])
+    # sarsaTest.makeVideo(nameVideo = 'videoSimu%d' % numSim0)
+    # sarsaTest.destroyCanvas()
+    # sarsaTest.deleteFigures()
     sarsaTest = None 
     
     outSurvivors = os.path.join(folderStateNames, "survivorsPerSim.csv")

@@ -568,8 +568,8 @@ class SARSA:
             x0_arr = np.array([ self.nodesdb[node0,1], self.nodesdb[node0,2] ])
             
             nodeTgt = self.shortestPathDB[node0,1]
-            # if nodeTgt == -9999:
-            #     return
+            if nodeTgt == -9999:
+                return
             numNodesLinked = self.transNodedb[node0, 1]
             nodesLinked = self.transNodedb[node0, 2:2+numNodesLinked]
             # print(nodesLinked)
