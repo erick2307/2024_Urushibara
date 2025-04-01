@@ -15,7 +15,7 @@ project_directory = os.path.dirname(os.path.abspath(__file__))
 outside_project_directory = os.path.join(project_directory, '..',)
 sys.path.append(outside_project_directory)
 
-def run(numSim0=0, numBlocks=1, simPerBlock=20, simulTime=10*60, foldername='Input'):
+def run(foldername='Input', numSim0=0, numBlocks=1, simPerBlock=20, simulTime=10*60, meanrayleigh=5):
     """
     Runs the SARSA test simulation.
 
@@ -36,7 +36,7 @@ def run(numSim0=0, numBlocks=1, simPerBlock=20, simulTime=10*60, foldername='Inp
     transLinkdbFile = os.path.join(foldername, "actionsdb.csv") 
     transNodedbFile = os.path.join(foldername, "transitionsdb.csv")
     folderStateNames = os.path.join(foldername, "StatesMatrices")
-    meanRayleighTest = 5 * 60 
+    meanRayleighTest = meanrayleigh * 60 
     
     survivorsPerSim = []  
     
@@ -71,7 +71,7 @@ def run(numSim0=0, numBlocks=1, simPerBlock=20, simulTime=10*60, foldername='Inp
     print("Checkpoint")    
     
     numSim = numSim0 + 1  
-    gleeFactor = 4.0 / simPerBlock 
+    gleeFactor = 9.0 / simPerBlock 
     for b in range(numBlocks):
         for s in range(simPerBlock):
             randomChoiceRate = 1.0 / (gleeFactor * s + 1.0)

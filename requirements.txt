@@ -4,3 +4,4 @@ opencv_python==4.10.0.84
 osmnx==1.9.3
 networkx==3.3
 pandas==2.2.3
+scipy
