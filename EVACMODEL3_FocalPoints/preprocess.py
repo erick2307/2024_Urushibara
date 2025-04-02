@@ -616,12 +616,13 @@ def main(areas, foldername, evacnodes, times, pop, multi=True, use_seed=True, sp
     #prepare folders
     check_folders(foldername, sp=sp)
     #download network
-    G = download_nwk(areas[foldername][0],areas[foldername][1],1000,show=False, close=True, save=True, foldername=foldername)
+    G = download_nwk(areas[foldername],show=False, close=True, save=True, foldername=foldername)
+    # G = download_point_nwk(areas[foldername][0],areas[foldername][1],1000,show=False, close=True, save=True, foldername=foldername)
     #set seed for replication
     if use_seed:
         np.random.seed(10)
-    #choose randomnly 4 nodes for evacuation
     pd.DataFrame(G.nodes(data=True)).to_csv(f'./{foldername}/original_nodes.csv',index=True)
+    #choose randomnly 'size' nodes for evacuation
     if evacnodes == None:
         evacnodes = np.random.choice(G.nodes, size=1)
     #prepare databases
