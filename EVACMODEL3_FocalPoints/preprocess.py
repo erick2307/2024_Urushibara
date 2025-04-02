@@ -3,6 +3,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import folium
+from folium import plugins
 import os
 import warnings
 from scipy.sparse import csr_matrix
@@ -42,7 +44,33 @@ def check_folders(foldername='Input', sp=False):
         os.makedirs(f'./{foldername}/StatesMatrices', exist_ok=True)
     print(f'Folder {foldername} created')
 
-def download_nwk(lat=38.435220,lon=141.303816,radius=1000, show=True, close=False, save=True, foldername='Input'):
+def download_nwk(polygon, show=True, close=False, save=True, foldername='Input'):
+    #get a graph
+    G = ox.graph_from_polygon(polygon, network_type='all', simplify=True)
+    # Get node positions
+    pos = {node: (data['x'], data['y']) for node, data in G.nodes(data=True)}
+    # Plot
+    fig, ax = ox.plot_graph(G,node_color='blue', bgcolor='white', show=show, close=close, save=save, filepath=f'./{foldername}/Figures/nwk_simple.png')
+    # Add custom node labels (here using node IDs)
+    for node, (x, y) in pos.items():
+        ax.text(x, y, str(node), fontsize=8, color='red')
+    filepath=f'./{foldername}/Figures/nwk_nodes.png'
+    fig.savefig(filepath, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    
+    #save graph as geojson files
+    nodes, edges = ox.graph_to_gdfs(G)
+    # Save edges as GeoJSON (recommended for road network)
+    edges.to_file(f'./{foldername}/Graph/Gedges.geojson', driver='GeoJSON')
+    # Optionally save nodes too
+    nodes.to_file(f'./{foldername}/Graph/Gnodes.geojson', driver='GeoJSON')
+    G_proj = ox.project_graph(G)
+    G_und = G_proj.to_undirected()
+    print('Graph downloaded')
+    return G_und
+
+
+def download_point_nwk(lat=38.435220,lon=141.303816,radius=1000, show=True, close=False, save=True, foldername='Input'):
     """
     Downloads a network graph from OpenStreetMap based on a specified location and radius, 
     and optionally plots and saves the graph.
@@ -548,6 +576,40 @@ def makeClosePath(foldername, nodesFile= os.path.join("Input","nodes.csv"),
                 nextNodeDB, delimiter=",", fmt= "%d")
     return
 
+def create_html_map(point_layers, polygon_layers, foldername):
+        #create an interactive map with the evacuation buildings and shelters and inundation
+    def create_map(location=[33.5, 133.5]):
+        # Create a map centered around `location`
+        m = folium.Map(location=location, zoom_start=12)
+        return m
+
+    def add_point_layer(m, gdf, color='blue', icon='info-sign'):
+        for _, row in gdf.iterrows():
+            folium.Marker(
+                location=[row.geometry.y, row.geometry.x],
+                icon=folium.Icon(color=color, icon=icon)
+            ).add_to(m)
+
+    def add_polygon_layer(m, gdf, color = 'blue'):
+        folium.GeoJson(
+            gdf.geometry,
+            style_function=lambda x: {'fillColor': color, 'color': color}
+        ).add_to(m)
+
+    def add_layer_control(m):
+        folium.LayerControl().add_to(m)
+
+    # Save the map to an HTML file
+    m = create_map()
+    if point_layers:
+        for layer in point_layers:
+            add_point_layer(m, layer['gdf'], color=layer['color'], icon=layer['icon'])
+    if polygon_layers:
+        for layer in polygon_layers:
+            add_polygon_layer(m, layer['gdf'], color=layer['color'])
+    add_layer_control(m)
+    m.save(f'./{foldername}/{foldername}_map.html')
+    return
     
 def main(areas, foldername, evacnodes, times, pop, multi=True, use_seed=True, sp=False):
     erase_folders(foldername)
